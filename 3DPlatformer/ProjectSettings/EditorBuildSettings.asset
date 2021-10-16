@@ -11,7 +11,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: cbc2faa03636cfc4c81eef152f5f67f1
+  - enabled: 0
+    path: Assets/AIE Stuff/AIE_Core/KinematicPlayer/Samples/SamplePlayerDemo.unity
+    guid: 365ab357294728e47b2ab11a82fedce3
   - enabled: 1
     path: Assets/Scenes/MainScene.unity
     guid: a335ff520e62c9b40a100afac78ea8d3
+  - enabled: 1
+    path: Assets/Scenes/GameOverScreen.unity
+    guid: 66a06490ab161484086ef1d0355405c5
   m_configObjects: {}

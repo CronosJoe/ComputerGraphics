@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using TMPro;
 
 /// <summary>
 /// Basic kinematic player motor demonstrating how to implement a motor for a KinematicBody
@@ -7,21 +8,25 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
 {
     [Header("Body")]
     public KinematicBody body;
-    
+    public Transform dummyReference;
+    public PlayerController playerRef;
+    public TMP_Text timerDisplay;
     [Header("Common Movement Settings")]
     public float moveSpeed = 8.0f;
     public float jumpHeight = 2.0f;
-    
+
     [Header("Ground Movement")]
     public float maxGroundAngle = 75f;
     public float groundAccel = 200.0f;
     public float groundFriction = 12.0f;
     public LayerMask groundLayers;
     public float maxGroundAdhesionDistance = 0.1f;
-    
+
     public bool Grounded { get; private set; }
     private bool wasGrounded;
-    
+    private bool isDashing { get; set; }
+    public bool canDash = true;
+
     [Header("Air Movement")]
     public float airAccel = 50.0f;
     public float airFriction = 3.0f;
@@ -31,6 +36,61 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
     // Input handling
     private Vector3 moveWish;
     private bool jumpWish;
+
+    //timer variables
+    [SerializeField]float currentTime = 0;
+    [Range(0, 360)]
+    [SerializeField] int bombTime = 120; // in seconds
+    [Range(0, 2)]
+    [SerializeField] float dashTime = 0.3f; //also in seconds
+    float maxDashTime = 0.1f;//set on start to dashTime
+    [Range(0,2)]
+    [SerializeField] float dashDelay = 0.5f;
+    float dashDelayMax = 0.0f;
+    [Range(0, 20)]
+    [SerializeField]int dashDistance = 5;
+
+
+
+
+    //Timer method
+    private void UpdateTimer() 
+    {
+        if (!playerRef.pause)
+        {
+            currentTime += Time.deltaTime;
+            if (isDashing)
+            {
+                dashTime -= Time.deltaTime;
+                if (dashTime <= 0)
+                {
+                    dashTime = maxDashTime;
+                    isDashing = false;
+                }
+            }
+            else if (!canDash)
+            {
+                dashDelay -= Time.deltaTime;
+                if (dashDelay <= 0)
+                {
+                    dashDelay = dashDelayMax;
+                    canDash = true;
+                }
+            }
+            if (bombTime <= currentTime)
+            {
+                playerRef.EndingTheGame(true); //this will automatically pull to end screen, might want animation/sound first
+                timerDisplay.text = "0 seconds left";
+            }
+            else 
+            {
+                timerDisplay.text = (int)(bombTime - currentTime) + " seconds left";
+            }
+
+        }
+    }
+
+
 
     //
     // Motor API
@@ -45,7 +105,13 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
     {
         jumpWish = true;
     }
-    
+    public void DashInput() 
+    {
+        if (canDash) 
+        {
+            isDashing = true;
+        }
+    }
     //
     // Motor Utilities
     //
@@ -61,53 +127,62 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
 
     public Vector3 UpdateVelocity(Vector3 oldVelocity)
     {
-        Vector3 velocity = oldVelocity;
-        
-        //
-        // integrate player forces
-        //
-        
-        if (jumpWish)
+        if (!isDashing)
         {
-            jumpWish = false;
+            Vector3 velocity = oldVelocity;
 
-            if(wasGrounded)
+            //
+            // integrate player forces
+            //
+
+            if (jumpWish)
             {
-                jumpedThisFrame = true;
+                jumpWish = false;
 
-                velocity.y += Mathf.Sqrt(-2.0f * body.EffectiveGravity.y * jumpHeight);
+                if (wasGrounded)
+                {
+                    jumpedThisFrame = true;
+
+                    velocity.y += Mathf.Sqrt(-2.0f * body.EffectiveGravity.y * jumpHeight);
+                }
             }
-        }
-        
-        bool isGrounded = !jumpedThisFrame && wasGrounded;
 
-        float effectiveAccel = (isGrounded ? groundAccel : airAccel);
-        float effectiveFriction = (isGrounded ? groundFriction : airFriction);
-        
-        // apply friction
-        float keepY = velocity.y;
-        velocity.y = 0.0f; // don't consider vertical movement in friction calculation
-        float prevSpeed = velocity.magnitude;
-        if (prevSpeed != 0)
+            bool isGrounded = !jumpedThisFrame && wasGrounded;
+
+            float effectiveAccel = (isGrounded ? groundAccel : airAccel);
+            float effectiveFriction = (isGrounded ? groundFriction : airFriction);
+
+            // apply friction
+            float keepY = velocity.y;
+            velocity.y = 0.0f; // don't consider vertical movement in friction calculation
+            float prevSpeed = velocity.magnitude;
+            if (prevSpeed != 0)
+            {
+                float frictionAccel = prevSpeed * effectiveFriction * Time.deltaTime;
+                velocity *= Mathf.Max(prevSpeed - frictionAccel, 0) / prevSpeed;
+            }
+
+            velocity.y = keepY;
+
+            // apply movement
+            moveWish = Vector3.ClampMagnitude(moveWish, 1);
+            float velocityProj = Vector3.Dot(velocity, moveWish);
+            float accelMag = effectiveAccel * Time.deltaTime;
+
+            // clamp projection onto movement vector
+            if (velocityProj + accelMag > moveSpeed)
+            {
+                accelMag = moveSpeed - velocityProj;
+            }
+
+            return velocity + (moveWish * accelMag);
+        }
+        else
         {
-            float frictionAccel = prevSpeed * effectiveFriction * Time.deltaTime;
-            velocity *= Mathf.Max(prevSpeed - frictionAccel, 0) / prevSpeed;
+            //direction will be v3.forward
+            canDash = false;
+            return dummyReference.forward * (dashDistance);
         }
-
-        velocity.y = keepY;
-
-        // apply movement
-        moveWish = Vector3.ClampMagnitude(moveWish, 1);
-        float velocityProj = Vector3.Dot(velocity, moveWish);
-        float accelMag = effectiveAccel * Time.deltaTime;
-
-        // clamp projection onto movement vector
-        if (velocityProj + accelMag > moveSpeed)
-        {
-            accelMag = moveSpeed - velocityProj;
-        }
-
-        return velocity + (moveWish * accelMag);
     }
 
     public void OnMoveHit(ref Vector3 curPosition, ref Vector3 curVelocity, Collider other, Vector3 direction, float pen)
@@ -177,10 +252,18 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
 
     private void Start()
     {
+        dashDelayMax = dashDelay;
+        maxDashTime = dashTime;
+
+
         body.motor = this;
         OnValidate();
     }
-    
+    private void Update()
+    {
+        UpdateTimer();
+    }
+
     private void OnValidate()
     {
         if(body == null ||body.BodyCollider == null) { return; }

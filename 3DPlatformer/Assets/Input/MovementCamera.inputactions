@@ -22,9 +22,17 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Teleport",
+                    "name": "Special",
                     "type": "Button",
                     "id": "709998ff-ad85-4775-8ef4-9f75bdbda977",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Dash",
+                    "type": "Button",
+                    "id": "648baf75-2c19-47d1-b3fb-33bd2a983446",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -45,7 +53,7 @@
                 {
                     "name": "up",
                     "id": "4eb7fbe5-83cb-4ab6-89de-813dc1625a2d",
-                    "path": "<Keyboard>/w",
+                    "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -56,7 +64,7 @@
                 {
                     "name": "down",
                     "id": "f03203a2-1fa8-47fc-a220-72775e7139f0",
-                    "path": "<Keyboard>/s",
+                    "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -67,7 +75,7 @@
                 {
                     "name": "left",
                     "id": "67931b8d-b13a-45d8-bac4-2217c3c81ec9",
-                    "path": "<Keyboard>/a",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -78,7 +86,7 @@
                 {
                     "name": "right",
                     "id": "71ffc140-5946-4d04-a51a-f2a23bab2134",
-                    "path": "<Keyboard>/d",
+                    "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -104,7 +112,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Teleport",
+                    "action": "Special",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "25bc85c0-fb71-4ddb-97fd-6b76e17a3578",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
