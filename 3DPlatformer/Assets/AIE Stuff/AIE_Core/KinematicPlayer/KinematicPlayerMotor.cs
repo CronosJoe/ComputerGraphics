@@ -42,13 +42,14 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
     [Range(0, 360)]
     [SerializeField] int bombTime = 120; // in seconds
     [Range(0, 2)]
-    [SerializeField] float dashTime = 0.3f; //also in seconds
+    public float dashTime = 0.3f; //also in seconds
     float maxDashTime = 0.1f;//set on start to dashTime
     [Range(0,2)]
-    [SerializeField] float dashDelay = 0.5f;
+    public float dashDelay = 0.5f;
     float dashDelayMax = 0.0f;
     [Range(0, 20)]
     [SerializeField]int dashDistance = 5;
+    Vector3 startingPosition = Vector3.zero;
 
 
 
@@ -244,6 +245,12 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
     {
         // record grounded status for next frame
         wasGrounded = Grounded;
+
+        if (transform.position.y <= -40.0f) 
+        {
+            body.InternalVelocity = Vector3.zero;
+            transform.position = startingPosition;
+        }
     }
     
     //
@@ -252,6 +259,8 @@ public class KinematicPlayerMotor : MonoBehaviour, IKinematicMotor
 
     private void Start()
     {
+        startingPosition = transform.position;
+
         dashDelayMax = dashDelay;
         maxDashTime = dashTime;
 

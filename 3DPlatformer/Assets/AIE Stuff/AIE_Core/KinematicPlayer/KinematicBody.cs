@@ -63,8 +63,8 @@ public class KinematicBody : MonoBehaviour
         }
     }
     
-    public Vector3 InternalVelocity { get; private set; }
-    public Vector3 Velocity { get; private set; }
+    public Vector3 InternalVelocity { get; set; }
+    public Vector3 Velocity { get; set; }
 
     public void CollideAndSlide(Vector3 bodyPosition, Vector3 bodyVelocity, Collider other)
     {

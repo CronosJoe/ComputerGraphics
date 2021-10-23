@@ -17,14 +17,15 @@ public class PlayerController : MonoBehaviour
     public bool pause;
     //implement animations here or in another script
     public Animator allThings;
+    public Animator UIAnimation;
     // Start is called before the first frame update
     void OnEnable()
     {
         input.currentActionMap["Jumping"].performed += JumpPlayer;
         input.currentActionMap["Special"].performed += TriggerSpecial; //this will most likely be some kind of roll or jump
         input.currentActionMap["Dash"].performed += SonicLevelsOfDash;
+        input.currentActionMap["Pause"].performed += PauseTheGame;
     }
-
 
     private void OnDisable()
     {
@@ -76,6 +77,17 @@ public class PlayerController : MonoBehaviour
     {
         motor.DashInput();
     }
+    private void PauseTheGame(InputAction.CallbackContext obj)
+    {
+        pause = !pause;
+        UIAnimation.SetBool("Paused", pause);
+    }
+    public void PauseTheGame() 
+    {
+        pause = !pause;
+        UIAnimation.SetBool("Paused", pause);
+    }
+
     public void EndingTheGame(bool playerLoss) 
     {
         if (playerLoss) 
